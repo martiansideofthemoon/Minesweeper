@@ -1,0 +1,381 @@
+<html>
+<body>
+<div id="tabarea">
+<button id="form" style="position:absolute; top:250px; left:530px;" onclick=Click1()>Form Grid</button>
+<button id="play" onclick=Click3() style="position:absolute; visibility:hidden; top:250px; left:520px;"><img src="smiley.jpg"></button>
+<button id="uncover" onclick=Click4() style="position:absolute; visibility:hidden; top:460px; left:780px;">Uncover</button>
+<button id="flag" onclick=Click4() style="position:absolute; visibility:hidden; top:460px; left:780px;">Flag</button>
+<b><p id="time2" style="position:absolute; top:560px; left:480px; visibility:hidden;">Time Up :- 0 seconds</p></b>
+<script type="text/javascript">
+// start of actual code
+var a,b,c,d,e,f,g,h,x,y; // variables needed
+var time3=0; // holds amount of time finished
+var game; // tells you whether game is in progress or has stopped
+var current="uncover"; // tells you active mode - uncover or flag
+var master_key = new Array (16);
+for (var i = 0; i < 16; ++ i) 
+master_key [i] = new Array (30); // creates master_key which holds values in cells
+var status1 = new Array (16);
+for (var i = 0; i < 16; ++ i)
+status1 [i] = new Array (30); // creates status1 which holds status of cells - covered,uncovered or flagged
+function Click1() // activated when "Form Grid" is clicked
+{
+// putting the cells in place
+for (var i=300;i<=764;i=i+16)
+{
+for (var j=300;j<=540;j=j+16)
+{
+var d = document.getElementById("tabarea");
+var new1 = document.createElement("img");
+new1.setAttribute("src","normal.jpg");
+new1.setAttribute("style","position:absolute; top:"+j+"px; left:"+i+"px;");
+new1.setAttribute("id","row"+((j-300)/16)+"col"+((i-300)/16));
+new1.setAttribute("onclick","Input("+((j-300)/16)+","+((i-300)/16)+")");
+new1.setAttribute("onmousedblclick","Flag1("+((j-300)/16)+","+((i-300)/16)+")");
+d.appendChild(new1);
+document.getElementById("form").style.visibility="hidden"; // hiding "Form Grid" button
+document.getElementById("time2").style.visibility="visible"; // showing time line
+document.getElementById("flag").style.visibility="visible"; // showing flag mode button
+}
+}
+game="in progress"; // customary to begin game
+emptyGrid(); // making all cells with status - covered and master_key - empty
+putMines(); // putting mines
+assignNumbers(); // assigning the numbers
+time1(); // starting the time
+}
+
+
+function emptyGrid() // empties grid
+{
+for (var i=0;i<16;i++)
+{
+for (var j=0;j<30;j++)
+master_key[i][j]="empty"; // making all contents "empty"
+}
+for (var i=0;i<16;i++)
+{
+for (var j=0;j<30;j++)
+{
+status1[i][j]="covered"; // making all status "covered"
+}
+}
+} // end of emptying grid
+
+
+function putMines() // way to put mines
+{
+for (var m=1;m<=99;m++) // ten mines need to be inserted
+{
+var place = Math.floor(Math.random()*480); // selects random number from 0 to 80
+var i_c = Math.floor(place/30); // row number selected
+var j_c = Math.floor(place%30); // column number selected
+if (master_key[i_c][j_c]=="empty") // checks if cell selected is mined or not
+master_key[i_c][j_c]="mine"; // puts mine there
+else 
+{
+abc: for (var i=i_c;i<16;i++)
+{
+for (var j=j_c;j<30;j++)
+{
+if (master_key[i][j]=="empty") // looks for next empty square
+{
+master_key[i][j]="mine"; // puts mine in next empty square
+break abc;
+}
+if (i==15 && j==29) // makes i and j = 0 if last square is reached
+{
+i=0; j=0;
+}
+}
+}
+}
+}
+} // End of putting mines
+
+
+function assignNumbers() // putting numbers in grid
+{
+for (var i=0;i<16;i++)
+{
+for (var j=0;j<30;j++)
+{
+if (master_key[i][j]=="empty") // checks if the square dosen't have a mine
+{
+var number=0; // keeps incrementing for each mine found around square
+if ((i+1)<16 && master_key[i+1][j]=="mine") // Checking upper square....the i+1<9 checks if such a square exists
+number++;
+if ((i-1)>-1 && master_key[i-1][j]=="mine") // Checking lower square...all conditions before the main one check if square exists
+number++;
+if ((j+1)<30 && master_key[i][j+1]=="mine") // Checking right square
+number++;
+if ((j-1)>-1 && master_key[i][j-1]=="mine") // Checking left square
+number++;
+if ((i+1)<16 && (j+1)<30 && master_key[i+1][j+1]=="mine") //checking diagonal square
+number++;
+if ((i-1)>-1 && (j-1)>-1 && master_key[i-1][j-1]=="mine")//checking diagonal square
+number++;
+if ((i+1)<16 && (j-1)>-1 && master_key[i+1][j-1]=="mine")//checking diagonal square
+number++;
+if ((i-1)>-1 &&  (j+1)<30 && master_key[i-1][j+1]=="mine")//checking diagonal square
+number++;
+// the following statements assign values to master_key
+if (number==1)
+master_key[i][j]="one";
+else if (number==2)
+master_key[i][j]="two";
+else if (number==3)
+master_key[i][j]="three";
+else if (number==4)
+master_key[i][j]="four";
+else if (number==5)
+master_key[i][j]="five";
+else if (number==6)
+master_key[i][j]="six";
+else if (number==7)
+master_key[i][j]="seven";
+else if (number==8)
+master_key[i][j]="eight";
+}
+}
+}
+} // end of assignNumbers()
+
+
+function time1() // function for time
+{
+setTimeout(
+function f1() 
+{
+if (game=="in progress")
+{
+time3++; // increase value of time3 every 1000 miliseconds
+document.getElementById("time2").innerHTML="Time Up :- "+time3+" seconds";
+time1();
+}
+},1000); // 1000 miliseconds
+}
+
+
+function Input(a,b) // function when cell with co ordinates a,b clicked. (coordinates start with 0)
+{
+if (current=="uncover") // checks if uncover mode is active
+{
+if (status1[a][b]=="covered") // checks if cell is covered
+{
+showSquare(a,b); // shows user cell with co ordinates a,b
+status1[a][b]="uncovered"; // changes that cell's status to to uncovered
+if (master_key[a][b]=="mine") // checks if cell contains mine
+mineFound(a,b); // activates to tell user he has lost
+else if (master_key[a][b]=="empty")
+emptyFound(a,b); // function when empty cell is found
+if (master_key[a][b]!="mine")
+checkWin(); // checks if user wins by clicking on a particular cell
+}
+}
+/* If flag mode is active, computer checks if cell is flagged.
+If it is, it makes cell unflagged and vice versa. */
+else if (current=="flag")
+{
+if (status1[a][b]=="covered") // checks if cell is covered
+{
+status1[a][b]="flagged"; // makes cell status flagged
+document.getElementById("row"+a+"col"+b).src="flag.jpg"; // changes its image to flagged cell
+}
+else if (status1[a][b]=="flagged") // covers cell if cell is flagged
+{
+status1[a][b]="covered";
+document.getElementById("row"+a+"col"+b).src="normal.jpg";
+}
+}
+} // End of Input function
+
+
+function showSquare(c,d) // showing user contents of square with co ordinates c,d
+{
+if (status1[c][d]=="covered") // checks if there is a need to show user
+{
+// The following lines show user the contents of cell
+if (master_key[c][d]=="mine")
+document.getElementById("row"+c+"col"+d).src="mine.jpg";
+else if (master_key[c][d]=="one")
+document.getElementById("row"+c+"col"+d).src="one.jpg";
+else if (master_key[c][d]=="two")
+document.getElementById("row"+c+"col"+d).src="two.jpg";
+else if (master_key[c][d]=="three")
+document.getElementById("row"+c+"col"+d).src="three.jpg";
+else if (master_key[c][d]=="four")
+document.getElementById("row"+c+"col"+d).src="four.jpg";
+else if (master_key[c][d]=="five")
+document.getElementById("row"+c+"col"+d).src="five.jpg";
+else if (master_key[c][d]=="six")
+document.getElementById("row"+c+"col"+d).src="six.jpg";
+else if (master_key[c][d]=="seven")
+document.getElementById("row"+c+"col"+d).src="seven.jpg";
+else if (master_key[c][d]=="eight")
+document.getElementById("row"+c+"col"+d).src="eight.jpg";
+else if (master_key[c][d]=="empty")
+document.getElementById("row"+c+"col"+d).src="empty.jpg";
+}
+else if (status1[c][d]=="flagged" && master_key[c][d]!="mine")
+document.getElementById("row"+c+"col"+d).src="not_mine.jpg";
+} // end of showSquare()
+
+
+function Click4() // function when Flag or Uncover is clicked
+{
+if (current=="uncover") // checks if uncover mode is active
+{
+current="flag"; // changes it to flag mode
+document.getElementById("flag").style.visibility="hidden"; // hides flag button
+document.getElementById("uncover").style.visibility="visible"; // shows uncover button
+}
+// vice versa for changing to uncover mode
+else if (current=="flag")
+{
+current="uncover";
+document.getElementById("flag").style.visibility="visible";
+document.getElementById("uncover").style.visibility="hidden";
+}
+}
+
+
+function mineFound(e,f) // function executed when mine is found
+{
+document.getElementById("row"+e+"col"+f).src="red mine.jpg"; // makes it red
+for (var i=0;i<16;i++)
+{
+for (var j=0;j<30;j++)
+{
+if (master_key[i][j]=="mine" || status1[i][j]=="flagged") // shows every mine..and flagged mistakes
+showSquare(i,j);
+status1[i][j]="uncovered"; // makes status of all squares "uncovered" so that user cannot click on any square
+}
+}
+game="stopped"; // stops game
+time3=0; // makes time = 0
+document.getElementById("play").style.visibility="visible"; // Shows smiley button
+document.getElementById("uncover").style.visibility="hidden"; // Hides uncover button
+document.getElementById("flag").style.visibility="hidden"; // Hides flag button
+}
+
+
+function emptyFound(g,h) // function when empty cell is found
+{
+uncoverSurrounding(g,h);
+checkWin();
+}
+
+
+function uncoverSurrounding(x,y)
+{
+if ((x+1)<16 && status1[x+1][y]=="covered")
+{
+showSquare((x+1),y);
+status1[x+1][y]="uncovered";
+if (master_key[x+1][y]=="empty")
+uncoverSurrounding(x+1,y);
+}
+if ((x-1)>-1 && status1[x-1][y]=="covered")
+{
+showSquare((x-1),y);
+status1[x-1][y]="uncovered";
+if (master_key[x-1][y]=="empty")
+uncoverSurrounding(x-1,y);
+}
+if ((y+1)<30 && status1[x][y+1]=="covered")
+{
+showSquare((x),(y+1));
+status1[x][y+1]="uncovered";
+if (master_key[x][y+1]=="empty")
+uncoverSurrounding(x,y+1);
+}
+if ((y-1)>-1 && status1[x][y-1]=="covered")
+{
+showSquare((x),(y-1));
+status1[x][y-1]="uncovered";
+if (master_key[x][y-1]=="empty")
+uncoverSurrounding(x,y-1);
+}
+if ((x+1)<16 && (y+1)<30 && status1[x+1][y+1]=="covered")
+{
+showSquare((x+1),(y+1));
+status1[x+1][y+1]="uncovered";
+if (master_key[x+1][y+1]=="empty")
+uncoverSurrounding(x+1,y+1);
+}
+if ((x-1)>-1 && (y-1)>-1 && status1[x-1][y-1]=="covered")
+{
+showSquare((x-1),(y-1));
+status1[x-1][y-1]="uncovered";
+if (master_key[x-1][y-1]=="empty")
+uncoverSurrounding(x-1,y-1);
+}
+if ((x+1)<16 && (y-1)>-1 && status1[x+1][y-1]=="covered")
+{
+showSquare((x+1),(y-1));
+status1[x+1][y-1]="uncovered";
+if (master_key[x+1][y-1]=="empty")
+uncoverSurrounding(x+1,y-1);
+}
+if ((x-1)>-1 &&  (y+1)<30 && status1[x-1][y+1]=="covered")
+{
+showSquare((x-1),(y+1));
+status1[x-1][y+1]="uncovered";
+if (master_key[x-1][y+1]=="empty")
+uncoverSurrounding(x-1,y+1);
+}
+}
+
+
+function checkWin() // checks if user has won
+{
+var counter1=0;
+for (var i=0;i<16;i++)
+{
+for (var j=0;j<30;j++)
+{
+if (master_key[i][j]!="mine" && (status1[i][j]=="uncovered"))
+counter1++; // increments if square is not mine and is uncovered
+}
+}
+if (counter1==381) // if all 381 squares are uncovered
+{
+for (var i=0;i<16;i++)
+{
+for (var j=0;j<30;j++)
+{
+if (master_key[i][j]=="mine" || status1[i][j]=="flagged")
+showSquare(i,j); // show all mines
+status1[i][j]="uncovered"; // change status to "uncovered" so that user can't click on any square
+}
+}
+game="stopped"; // stop game
+time3=0; // make time=0
+alert("You Won!!"); // show winning alert
+document.getElementById("play").style.visibility="visible"; // show Smiley button
+document.getElementById("uncover").style.visibility="hidden"; // Hide Uncover button
+document.getElementById("flag").style.visibility="hidden"; // Hide Flag button
+}
+}
+
+
+function Click3() // function when Smiley button is clicked. Restarts game
+{
+for (var i=0;i<16;i++)
+{
+for (var j=0;j<30;j++)
+document.getElementById("row"+i+"col"+j).src="normal.jpg"; // show normal covered squares in all squares
+}
+emptyGrid(); // emptying grid
+putMines(); // putting mines
+assignNumbers(); // assigning numbers
+document.getElementById("time2").innerHTML="Time Up :- 0 seconds"; // showing time=0sec
+game="in progress"; // changes game status
+time1(); // starts time
+document.getElementById("play").style.visibility="hidden"; //hides smiley
+document.getElementById("flag").style.visibility="visible"; // shows flag mode button
+}
+</script>
+</body>
+</html>
